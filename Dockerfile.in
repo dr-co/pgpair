@@ -1,0 +1,4 @@
+FROM postgres:${VERSION}
+WORKDIR /srv
+COPY run_cluster.sh /srv
+ENTRYPOINT [ 'bash', 'run_cluster.sh', "${VERSION}" ]
