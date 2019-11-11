@@ -13,14 +13,14 @@ Here is unera/pgpair:9.5, unera/pgpair:10, unera/pgpair:11, etc
 **Environment**:
 
 - `PG_USER`, `PG_PASSWORD` - user and password (default is test@test)
-- `PG_DATABASE` - database. (default is test) 
+- `PG_DB` - database. (default is test) 
 - `PG_MASTER_PORT` (default is 5432)
 - `PG_SLAVE_PORT` (default is 5433)
 
 
 **Note**: You can create several databases using space symbol in database name:
 
-`PG_DATABASES="test1 test2"` creates 2 databases `test1`, `test2`
+`PG_DB="test1 test2"` creates 2 databases `test1`, `test2`
 
 Example `gitlab-ci.yml`:
 
@@ -30,7 +30,7 @@ variables:
     PG_PASSWORD: mypass
     PG_MASTER_PORT: 1234
     PG_SLAVE_PORT: 4321
-    PG_DATABASE: test1 test2
+    PG_DB: test1 test2
 services:
     - name: unera/pgpair:11
       alias: shard0

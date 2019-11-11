@@ -1,4 +1,5 @@
 #!/bin/bash
+
 set -e
 
 BIN=/usr/lib/postgresql/${1-11}/bin
@@ -30,6 +31,13 @@ cleanup_fuckup() {
     done
     exit -1
 }
+
+if test "$(id -u)" = '0'; then
+    chmod 0777 /srv
+    echo exec gosu postgres bash "$BASH_SOURCE" "$@"
+    exec      gosu postgres bash "$BASH_SOURCE" "$@"
+fi
+
 
 trap cleanup_fuckup EXIT
 
@@ -67,7 +75,7 @@ mkdir data-master/logs data-master/sockets
     echo host replication all ::1/128 md5
 } > data-master/pg_hba.conf
 
-$BIN/pg_ctl -D data-master -l data-master/logs/postgresql.log start
+$BIN/pg_ctl -D data-master start
 
 for db in $DATABASE; do
     PGHOST=localhost \
@@ -79,7 +87,7 @@ for db in $DATABASE; do
                 $db
 done
 
-$BIN/pg_ctl -D data-master -l data-master/logs/postgresql.log stop
+$BIN/pg_ctl -D data-master stop
 
 rsync -a data-master/ data-slave/
 rm -f data-slave/*.pid
@@ -91,7 +99,15 @@ sed -Ei "s/^port = $MASTER_PORT/port = $SLAVE_PORT/" data-slave/postgresql.conf
     echo "primary_conninfo = 'postgresql://$USER:$PASSWORD@localhost:$MASTER_PORT'"
 } > data-slave/recovery.conf
 
-$BIN/pg_ctl -D data-master -l data-master/logs/postgresql.log start
-$BIN/pg_ctl -D data-slave -l data-slave/logs/postgresql.log start
+$BIN/pg_ctl -D data-master start
+$BIN/pg_ctl -D data-slave start
+
+#PGPASSWORD=$PASSWORD PGUSER=$USER psql -h localhost -p $MASTER_PORT $DATABASE
+while sleep 10; do
+    echo -n .
+done
+
+$BIN/pg_ctl -D data-slave  stop
+$BIN/pg_ctl -D data-master  stop
 
 FUCKUP=no
