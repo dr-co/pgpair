@@ -69,13 +69,15 @@ mkdir data-master/logs data-master/sockets
 
 $BIN/pg_ctl -D data-master -l data-master/logs/postgresql.log start
 
-PGHOST=localhost \
-    PGPORT=$MASTER_PORT \
-    PGUSER=$USER \
-    PGPASSWORD=$PASSWORD \
-        $BIN/createdb -U $USER \
-            -O $USER \
-            $DATABASE
+for db in $DATABASE; do
+    PGHOST=localhost \
+        PGPORT=$MASTER_PORT \
+        PGUSER=$USER \
+        PGPASSWORD=$PASSWORD \
+            $BIN/createdb -U $USER \
+                -O $USER \
+                $db
+done
 
 $BIN/pg_ctl -D data-master -l data-master/logs/postgresql.log stop
 

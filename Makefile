@@ -1,4 +1,4 @@
-VERSIONS    =  9.5 10 11
+VERSIONS    =  9.5 10 11 12
 LATEST	    = 11
 REPO	    = unera
 
