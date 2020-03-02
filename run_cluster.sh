@@ -65,6 +65,7 @@ mkdir data-master/logs data-master/sockets
     echo "max_replication_slots = 5"
     echo "hot_standby = on"
     echo "hot_standby_feedback = on"
+    echo "max_connections = 1024"
 
 } >> data-master/postgresql.conf
 
