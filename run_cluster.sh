@@ -16,6 +16,8 @@ DATABASE=${PG_DB-test}
 MASTER_PORT=${PG_MASTER_PORT-5432}
 SLAVE_PORT=${PG_SLAVE_PORT-5433}
 
+TEMP_MASTER_PORT=${PG_TEMP_MASTER_PORT-8765}
+
 FUCKUP=yes
 
 cleanup_fuckup() {
@@ -59,13 +61,13 @@ mkdir data-master/logs data-master/sockets
 {
     echo "listen_addresses = '*'"
     echo "unix_socket_directories = 'sockets'"
-    echo "port = $MASTER_PORT"
+    echo "port = $TEMP_MASTER_PORT"
     echo "wal_level = hot_standby"
     echo "max_wal_senders = 5"
     echo "max_replication_slots = 5"
     echo "hot_standby = on"
     echo "hot_standby_feedback = on"
-    echo "max_connections = 1024"
+    echo "max_connections = 32"
 
 } >> data-master/postgresql.conf
 
@@ -80,7 +82,7 @@ $BIN/pg_ctl -D data-master start
 
 for db in $DATABASE; do
     PGHOST=localhost \
-        PGPORT=$MASTER_PORT \
+        PGPORT=$TEMP_MASTER_PORT \
         PGUSER=$USER \
         PGPASSWORD=$PASSWORD \
             $BIN/createdb -U $USER \
@@ -93,15 +95,16 @@ $BIN/pg_ctl -D data-master stop
 rsync -a data-master/ data-slave/
 rm -f data-slave/*.pid
 
-sed -Ei "s/^port = $MASTER_PORT/port = $SLAVE_PORT/" data-slave/postgresql.conf
+sed -Ei "s/^port = $TEMP_MASTER_PORT/port = $MASTER_PORT/" data-master/postgresql.conf
+sed -Ei "s/^port = $TEMP_MASTER_PORT/port = $SLAVE_PORT/" data-slave/postgresql.conf
 
 {
     echo "standby_mode = 'on'"
     echo "primary_conninfo = 'postgresql://$USER:$PASSWORD@localhost:$MASTER_PORT'"
 } > data-slave/recovery.conf
 
-$BIN/pg_ctl -D data-master start
-$BIN/pg_ctl -D data-slave start
+$BIN/pg_ctl -D data-master -l master.log start
+$BIN/pg_ctl -D data-slave  -l slave.log start
 
 #PGPASSWORD=$PASSWORD PGUSER=$USER psql -h localhost -p $MASTER_PORT $DATABASE
 while sleep 10; do
