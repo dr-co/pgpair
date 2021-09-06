@@ -111,6 +111,8 @@ if test $VERSION -gt 11; then
     echo "primary_conninfo = 'postgresql://$USER:$PASSWORD@localhost:$MASTER_PORT'"
 } >> data-slave/postgresql.conf
 
+touch data-slave/standby.signal
+
 else
 {
     echo "standby_mode = 'on'"

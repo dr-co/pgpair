@@ -22,5 +22,9 @@ upload:
 	for v in $(VERSIONS); do \
 	    docker push $(REPO)/pgpair:$$v; \
 	done; \
-	test $(SKIP_LAST) == no && docker push $(REPO)/pgpair:latest
+	if test $(SKIP_LAST) = no; then \
+	    docker push $(REPO)/pgpair:latest; \
+	else \
+	    echo skip :last uploading; \
+	fi
         
