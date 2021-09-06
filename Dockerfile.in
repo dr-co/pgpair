@@ -1,6 +1,6 @@
 FROM postgres:${VERSION}
 RUN apt-get -qy update
-RUN apt-get install rsync
+RUN apt-get -qy install rsync
 
 COPY run_cluster.sh /srv
 ENTRYPOINT ["/bin/bash", "/srv/run_cluster.sh", "${VERSION}"]
