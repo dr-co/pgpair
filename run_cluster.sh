@@ -95,8 +95,8 @@ $BIN/pg_ctl -D data-master stop
 rsync -a data-master/ data-slave/
 rm -f data-slave/*.pid
 
-sed -Ei "s/^port = $TEMP_MASTER_PORT/port = $MASTER_PORT/" data-master/postgresql.conf
-sed -Ei "s/^port = $TEMP_MASTER_PORT/port = $SLAVE_PORT/" data-slave/postgresql.conf
+sed -Ei "s/^port =.*/port = $MASTER_PORT/" data-master/postgresql.conf
+sed -Ei "s/^port =.*/port = $SLAVE_PORT/" data-slave/postgresql.conf
 
 {
     echo "standby_mode = 'on'"
