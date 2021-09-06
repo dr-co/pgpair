@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+#set -x
 
 BIN=/usr/lib/postgresql/${1-11}/bin
 
@@ -29,6 +30,11 @@ cleanup_fuckup() {
     for mode in master slave; do
         if test -r data-$mode/postmaster.pid; then
             $BIN/pg_ctl -D data-$mode stop
+        fi
+
+        if test -r $mode.log; then
+            echo "================ $mode.log"
+            cat $mode.log
         fi
     done
     exit -1
