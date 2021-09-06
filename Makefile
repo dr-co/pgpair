@@ -1,6 +1,7 @@
 VERSIONS    ?=  9.5 10 11 12 13
 LATEST	    ?= 11
 REPO	    ?= unera
+SKIP_LAST   ?= no
 
 build:
 	@set -e; \
@@ -21,5 +22,5 @@ upload:
 	for v in $(VERSIONS); do \
 	    docker push $(REPO)/pgpair:$$v; \
 	done; \
-	docker push $(REPO)/pgpair:latest
+	test $(SKIP_LAST) == no && docker push $(REPO)/pgpair:latest
         
