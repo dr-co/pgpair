@@ -3,10 +3,12 @@
 set -e
 #set -x
 
-BIN=/usr/lib/postgresql/${1-11}/bin
+VERSION=${1-11}
+
+BIN=/usr/lib/postgresql/${VERSION}/bin
 
 if ! test -d $BIN; then
-    echo postgresql version ${1-11} is not installed properly
+    echo postgresql version ${VERSION} is not installed properly
     exit -1
 fi
 
@@ -104,10 +106,17 @@ rm -f data-slave/*.pid
 sed -Ei "s/^port =.*/port = $MASTER_PORT/" data-master/postgresql.conf
 sed -Ei "s/^port =.*/port = $SLAVE_PORT/" data-slave/postgresql.conf
 
+if test $VERSION -gt 11; then
+{
+    echo "primary_conninfo = 'postgresql://$USER:$PASSWORD@localhost:$MASTER_PORT'"
+} >> data-slave/postgresql.conf
+
+else
 {
     echo "standby_mode = 'on'"
     echo "primary_conninfo = 'postgresql://$USER:$PASSWORD@localhost:$MASTER_PORT'"
 } > data-slave/recovery.conf
+fi
 
 $BIN/pg_ctl -D data-master -l master.log start
 $BIN/pg_ctl -D data-slave  -l slave.log start

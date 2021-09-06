@@ -21,5 +21,5 @@ upload:
 	for v in $(VERSIONS); do \
 	    docker push $(REPO)/pgpair:$$v; \
 	done; \
-	#docker push $(REPO)/pgpair:latest
+	docker push $(REPO)/pgpair:latest
         
